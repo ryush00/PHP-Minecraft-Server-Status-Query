@@ -36,7 +36,7 @@
             }
 
             if(preg_match('/1.7|1.8/',$version)) {
-
+				echo $version;
                 $start = microtime(true);
 
                 $handshake = pack('cccca*', hexdec(strlen($host)), 0, 0x04, strlen($host), $host).pack('nc', $port, 0x01);
@@ -48,11 +48,11 @@
                 $ping = round((microtime(true)-$start)*1000); //calculate the high five duration
 
                 $packetlength = $this->read_packet_length($socket);
-
+				/*
                 if($packetlength < 10) {
                     return false;
                 }
-
+				*/
                 socket_read($socket, 1);
 
                 $packetlength = $this->read_packet_length($socket);
@@ -60,6 +60,7 @@
                 $data = socket_read($socket, $packetlength, PHP_NORMAL_READ);
 
                 if(!$data) {
+				echo "데이터 없음";
                     return false;
                 }
 
@@ -71,15 +72,28 @@
                 $serverdata['maxplayers'] = $data->players->max;
 
                 $motd = $data->description;
-                $motd = preg_replace("/(§.)/", "",$motd);
-                $motd = preg_replace("/[^[:alnum:][:punct:] ]/", "", $motd);
+				echo "<br /><br />";
+				var_dump(get_object_vars($data));
+				echo "<br /><br />";
+				if($motd->text) {
+                $serverdata['motd']  = preg_replace("/(§.)/", "",$motd->text);
+                $serverdata['motd']  = preg_replace("/[^[:alnum:][:punct:] ]/", "", $serverdata['motd'] );
+				} else {
+                $serverdata['motd']  = preg_replace("/(§.)/", "",$motd);
+                $serverdata['motd']  = preg_replace("/[^[:alnum:][:punct:] ]/", "", $serverdata['motd'] );
 
-                $serverdata['motd'] = $motd;
+				}
+				
+                //$serverdata['motd'] = $motd;
+				echo "<br /><br />";
+				var_dump($serverdata);
+				echo "<br /><br />";
                 $serverdata['motd_raw'] = $data->description;
                 $serverdata['favicon'] = $data->favicon;
                 $serverdata['ping'] = $ping;
 
             } else {
+				echo $version;
 
                 $start = microtime(true);
 
